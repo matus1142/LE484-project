@@ -24,6 +24,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <bsp.h>
+#include <timer.h>
+#include <ctrler.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,7 +47,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+int Button1 = 0;
+int Button2 = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,8 +61,31 @@ static void MX_GPIO_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int fputc(int ch, FILE *f){
-	
-	return ITM_SendChar(ch);
+
+		return ITM_SendChar(ch);
+}
+
+Event_t Event_Detect(){
+				
+			Event_t evt = NO_EVT;
+			if(Timeout_Status){
+					evt = TIMEOUT;
+					Timeout_Status = 0;
+			}
+			if(Button1 || Button2){
+					evt = BUTTON;
+					Button1 = 0;
+					Button2 = 0;
+			}
+			
+			if(MODE_READ() == SET){
+			evt = MODE_CHANGE;
+			}
+    
+			
+			return evt;
+			
+
 }
 /* USER CODE END 0 */
 
@@ -101,8 +128,14 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	printf("HELLO WORLD");
-  }
+	
+		Event_t evt = Event_Detect();   
+    uint32_t timeout_value = Ctrler_Exec(evt);
+    Timeout_Config(timeout_value);
+    Delay(5);//function delay
+	
+		
+	}
   /* USER CODE END 3 */
 }
 
@@ -151,9 +184,63 @@ void SystemClock_Config(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, YELLOW_Pin|GREEN_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(RED_GPIO_Port, RED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, WALK_Pin|DWALK_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : MODE_SW_Pin MIN_GREEN_TIME_Pin WALK_INTERVAL_Pin */
+  GPIO_InitStruct.Pin = MODE_SW_Pin|MIN_GREEN_TIME_Pin|WALK_INTERVAL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : YELLOW_Pin GREEN_Pin */
+  GPIO_InitStruct.Pin = YELLOW_Pin|GREEN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Button1_Pin Button2_Pin */
+  GPIO_InitStruct.Pin = Button1_Pin|Button2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : RED_Pin */
+  GPIO_InitStruct.Pin = RED_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(RED_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : WALK_Pin DWALK_Pin */
+  GPIO_InitStruct.Pin = WALK_Pin|DWALK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

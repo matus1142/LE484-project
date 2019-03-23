@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/aloha/Desktop/LE484_Projects/LE484-project/TrafficLightController/Inc
+HeaderPath=C:/Users/aloha/Desktop/LE484_Projects/le484-project/TrafficLight(MATUS PROJECTS)/Inc
 HeaderFiles=stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;
-SourcePath=C:/Users/aloha/Desktop/LE484_Projects/LE484-project/TrafficLightController/Src
+SourcePath=C:/Users/aloha/Desktop/LE484_Projects/le484-project/TrafficLight(MATUS PROJECTS)/Src
 SourceFiles=stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]
