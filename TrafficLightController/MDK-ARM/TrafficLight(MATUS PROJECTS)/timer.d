@@ -29,4 +29,5 @@ trafficlight(matus projects)\timer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f
 trafficlight(matus projects)\timer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 trafficlight(matus projects)\timer.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 trafficlight(matus projects)\timer.o: ../Inc/main.h
+trafficlight(matus projects)\timer.o: ../Inc/ctrler.h
 trafficlight(matus projects)\timer.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

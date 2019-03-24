@@ -24,9 +24,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include <bsp.h>
-#include <timer.h>
-#include <ctrler.h>
+#include "bsp.h"
+#include "timer.h"
+#include "ctrler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +49,7 @@
 /* USER CODE BEGIN PV */
 int Button1 = 0;
 int Button2 = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,7 +69,8 @@ int fputc(int ch, FILE *f){
 Event_t Event_Detect(){
 				
 			Event_t evt = NO_EVT;
-			if(Timeout_Status){
+		if(MODE_READ() != SET){
+			if(Timeout_Status){	
 					evt = TIMEOUT;
 					Timeout_Status = 0;
 			}
@@ -77,15 +79,38 @@ Event_t Event_Detect(){
 					Button1 = 0;
 					Button2 = 0;
 			}
-			
-			if(MODE_READ() == SET){
+		}else{
 			evt = MODE_CHANGE;
 			}
     
 			
 			return evt;
-			
+		
+}
 
+int Green_selected(){
+		int TimeGreen = 0;
+			if(GREEN_TIME() == SET){
+				TimeGreen = 1200;
+			}
+			else {
+				TimeGreen = 600;
+			}
+
+
+		return TimeGreen;
+}
+
+int Walk_selected(){
+		static int Walktime = 0;
+			if(WALK_INTERVAL() == SET){
+					Walktime = 200;
+			}
+			else {
+					Walktime = 100;
+			}
+
+		return Walktime;
 }
 /* USER CODE END 0 */
 
@@ -119,7 +144,7 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
+/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -132,9 +157,13 @@ int main(void)
 		Event_t evt = Event_Detect();   
     uint32_t timeout_value = Ctrler_Exec(evt);
     Timeout_Config(timeout_value);
-    Delay(5);//function delay
-	
+		Delay(1);
 		
+		
+		
+	
+	
+				
 	}
   /* USER CODE END 3 */
 }

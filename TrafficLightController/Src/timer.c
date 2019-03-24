@@ -1,8 +1,10 @@
 #include "timer.h"
+#include "ctrler.h"
 #include <stdio.h>
 volatile uint32_t Tick = 0;
 uint32_t Timeout_Value = 0;
 int Timeout_Status = 0;
+
 
 /** @brief Set timeout value
 */
@@ -10,6 +12,7 @@ void Timeout_Config(uint32_t timeout_value)
 {
     if (timeout_value > 0) {
         Timeout_Value = Tick + timeout_value;
+			
     }
 }
 
@@ -24,14 +27,18 @@ void Delay(uint32_t delay_value)
 /** @brief Update Tick every 0.1 second and check timeout
 */
 void HAL_IncTick(void)
-{
+{		
     static int Count = 0;
     Count = (Count+1)%100;
     if (Count == 0) {
-        Tick++;
+        Tick++;				
 				//printf("Tick = %d\n",Tick);
+				//printf("Timeout_Value = %d\n",Timeout_Value);
         if (Tick == Timeout_Value) {
+					
             Timeout_Status = 1;
-        }
+
+				}
+				//printf("Timeout_Status = %d\n",Timeout_Status);
     }
 }
