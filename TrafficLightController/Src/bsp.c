@@ -5,7 +5,7 @@
 // exported global variables
 /*volatile int Button_Status = 0;*/
 int x = 0; //WALK BLINK CHECK
-
+extern int Button1;
 /** @brief  Initialize I/O for lamps
     @retval None
 */
@@ -37,6 +37,7 @@ void Signal_Pass(void)
 	RED_OFF();
 	Delay(5);
 	GREEN_ON();	
+
 }
 
 /** @brief  Change lamps to RED
