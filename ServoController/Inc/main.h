@@ -68,6 +68,12 @@ void Error_Handler(void);
 #define SW3_GPIO_Port GPIOE
 #define SW4_Pin GPIO_PIN_6
 #define SW4_GPIO_Port GPIOE
+#define Button1_Pin GPIO_PIN_2
+#define Button1_GPIO_Port GPIOB
+#define Button1_EXTI_IRQn EXTI2_IRQn
+#define Button2_Pin GPIO_PIN_15
+#define Button2_GPIO_Port GPIOB
+#define Button2_EXTI_IRQn EXTI15_10_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

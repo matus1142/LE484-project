@@ -41,6 +41,8 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 uint16_t Value;
+int Button1 = 0;
+int Button2 = 0;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -75,6 +77,26 @@ int fputc(int ch, FILE *f)
 {
   return ITM_SendChar(ch);  
 }
+
+int Enable1(){
+		static int EV1 = 0;
+	if(Button1){		
+			EV1 = !EV1;
+			Button1 = 0;
+	}
+	return EV1;
+}
+
+
+int Enable2(){
+		static int EV2 = 0;
+	if(Button2){		
+			EV2 = !EV2;
+			Button2 = 0;
+	}
+	return EV2;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -131,16 +153,14 @@ uint16_t period = 0;
 		period = 0;
 	}	
     __HAL_TIM_SET_AUTORELOAD(&htim1, period);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, period/4);       
-
-	if(SW2() == SET){
+  if(SW2() == SET){  
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, period/4);       
 		printf("Value: %d\n", Value);
 		Value = 0;
 	 }else{
 		printf("PLEASE TURN ON SW2 FOR READ PERIOD\n");
 	 }
-	 
-	 
+	 	 
 	if(SW3() == SET){
 		V = 1861;
 	}else{
@@ -149,26 +169,38 @@ uint16_t period = 0;
 	
     HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, V);
     HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-    HAL_ADC_Start(&hadc1);
+	if(SW4() == SET){
+		HAL_ADC_Start(&hadc1);
     while(HAL_ADC_PollForConversion(&hadc1, 1000));
     uint16_t analogVal = HAL_ADC_GetValue(&hadc1);
-  if(SW4() == SET){ 
 		printf("Analog value: %d\n", analogVal);   
 	}else{
 		printf("PLEASE TURN ON SW4 FOR READ VOLTAGE\n");
 	}
+
+	int EV1 = Enable1();
+	int EV2 = Enable2();
+		char txt1[] ="Hello,World";
+    static char Buffer[30];  
+  if(EV1 == 1){
+		HAL_UART_Transmit_IT(&huart3, txt1, strlen(txt1));
+		HAL_UART_Receive_IT(&huart3, Buffer, strlen(txt1));
+		printf("Text: %s, %s\n", txt1, Buffer);
+		if(EV2==1){
+			printf("Number of received characters : %d\n", strlen(txt1));
+		}
+	}else{
+		printf("PLEASE PUSH BUTTON FOR TRANSMIT UART\n");
+	}
 	
 	
-	 
-    char txt[] = "Hello";
-    static char Buffer[20];  
-    HAL_UART_Transmit_IT(&huart3, txt, strlen(txt));
-    HAL_UART_Receive_IT(&huart3, Buffer, strlen(txt));
-    printf("Text: %s, %s\n", txt, Buffer);
-  
 	
 	
-	HAL_Delay(1000);
+	
+	
+	printf("--------------------------------------------------\n");
+	HAL_Delay(2000);
+	
 	}
   /* USER CODE END 3 */
 }
@@ -480,6 +512,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Button1_Pin Button2_Pin */
+  GPIO_InitStruct.Pin = Button1_Pin|Button2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
