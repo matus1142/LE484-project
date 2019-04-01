@@ -43,6 +43,10 @@
 uint16_t Value;
 int Button1 = 0;
 int Button2 = 0;
+int period = 0;
+int V;
+char txt1[] ="Hello,World";
+static char Buffer[20];
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -97,6 +101,71 @@ int Enable2(){
 	return EV2;
 }
 
+void PDM(){
+	
+	if(SW1()== SET){
+		period = 1999; //2000 us = 500Hz
+	}else {
+		period = 0;
+	}	
+    __HAL_TIM_SET_AUTORELOAD(&htim1, period);
+}
+
+void CPW(){
+	if(SW2() == SET){  
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, period/4);       
+		printf("Value: %d\n", Value);
+		Value = 0;
+	 }else{
+		printf("PLEASE TURN ON SW2 FOR READ PERIOD\n");
+	 }
+}
+void GV(){
+	if(SW3() == SET){
+		V = 1861;
+	}else{
+		V = 0;
+	}
+	
+    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, V);
+    HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+}
+
+void RV(){
+	
+	 if(SW4() == SET){
+		HAL_ADC_Start(&hadc1);
+    while(HAL_ADC_PollForConversion(&hadc1, 1000));
+    uint16_t analogVal = HAL_ADC_GetValue(&hadc1);
+		printf("Analog value: %d\n", analogVal);   
+	}else{
+		printf("PLEASE TURN ON SW4 FOR READ VOLTAGE\n");
+	}
+}
+
+void SUART(int EV1){
+
+  if(EV1 == 1){
+		HAL_UART_Transmit_IT(&huart3, txt1, strlen(txt1));
+		//
+		HAL_UART_Receive_IT(&huart3, Buffer, strlen(txt1));	
+	}else{
+		printf("PLEASE PUSH BUTTON FOR TRANSMIT UART\n");
+	}
+}
+void RUART(int EV2){
+	
+		//printf("Text: %s, %s\n", txt1, Buffer);
+		if(EV2==1){
+		//	HAL_UART_Receive_IT(&huart3, Buffer, strlen(txt1));		
+			printf("Text: %s, %s\n", txt1, Buffer);
+			printf("Number of received characters : %d\n", strlen(Buffer));
+		}else{		
+		printf("PLEASE PUSH BUTTON FOR RECEIVE UART\n");		
+		}
+
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -143,57 +212,20 @@ uint16_t period = 0;
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		int V;
+		
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  if(SW1()== SET){
-		period = 1999; //2000 us = 500Hz
-	}else {
-		period = 0;
-	}	
-    __HAL_TIM_SET_AUTORELOAD(&htim1, period);
-  if(SW2() == SET){  
-		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, period/4);       
-		printf("Value: %d\n", Value);
-		Value = 0;
-	 }else{
-		printf("PLEASE TURN ON SW2 FOR READ PERIOD\n");
-	 }
-	 	 
-	if(SW3() == SET){
-		V = 1861;
-	}else{
-		V = 0;
-	}
+ 
 	
-    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, V);
-    HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
-	if(SW4() == SET){
-		HAL_ADC_Start(&hadc1);
-    while(HAL_ADC_PollForConversion(&hadc1, 1000));
-    uint16_t analogVal = HAL_ADC_GetValue(&hadc1);
-		printf("Analog value: %d\n", analogVal);   
-	}else{
-		printf("PLEASE TURN ON SW4 FOR READ VOLTAGE\n");
-	}
-
-	int EV1 = Enable1();
-	int EV2 = Enable2();
-		char txt1[] ="Hello,World";
-    static char Buffer[30];  
-  if(EV1 == 1){
-		HAL_UART_Transmit_IT(&huart3, txt1, strlen(txt1));
-		HAL_UART_Receive_IT(&huart3, Buffer, strlen(txt1));
-		printf("Text: %s, %s\n", txt1, Buffer);
-		if(EV2==1){
-			printf("Number of received characters : %d\n", strlen(txt1));
-		}
-	}else{
-		printf("PLEASE PUSH BUTTON FOR TRANSMIT UART\n");
-	}
-	
-	
+	 PDM();
+	 CPW();
+	 GV();
+	 RV();
+	 int EV1 = Enable1();
+	 int EV2 = Enable2();
+	 SUART(EV1);
+	 RUART(EV2);
 	
 	
 	

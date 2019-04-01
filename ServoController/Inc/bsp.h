@@ -11,6 +11,13 @@ extern "C" {
 #define SW3()     (HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_5) == SET)
 #define SW4()     (HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_6) == SET)
 
+int Enable1();
+int Enable2();
+void PDM();
+void CPW();
+void GV();
+void RV();
+void SRUART(int EV1,int EV2);
 
 #ifdef __cplusplus
 }
